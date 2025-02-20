@@ -68,7 +68,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                                         let (width, height) = image.dimensions();
                                         let size = width.min(height);
 
-                                        let cropped_image = crop(
+                                        let image = crop(
                                             &mut image,
                                             (width - size) / 2,
                                             (height - size) / 2,
@@ -77,30 +77,20 @@ fn main() -> Result<(), Box<dyn Error>> {
                                         )
                                         .to_image();
 
-                                        let thumb = thumbnail(&cropped_image, 64, 64);
+                                        let image = thumbnail(&image, 64, 64);
 
-                                        let thumb = unsharpen(&thumb, 0.5, 5);
+                                        let image = unsharpen(&image, 0.5, 5);
 
-                                        let (width, height) = thumb.dimensions();
-                                        let mut pixel_values = Vec::new();
-
-                                        for y in 0..height {
-                                            for x in 0..width {
-                                                let pixel = thumb.get_pixel(x, y);
-                                                let r = gamma_lut[pixel.0[0] as usize];
-                                                let g = gamma_lut[pixel.0[1] as usize];
-                                                let b = gamma_lut[pixel.0[2] as usize];
-
-                                                pixel_values.push(r); // R
-                                                pixel_values.push(g); // G
-                                                pixel_values.push(b); // B
-                                            }
-                                        }
+                                        let pixel_values: Vec<u8> = image
+                                            .into_vec()
+                                            .into_iter()
+                                            .map(|v| gamma_lut[v as usize])
+                                            .collect();
 
                                         conn.write(&pixel_values)?;
 
                                         // Save as PNG
-                                        thumb.save("webcam_capture.png")?;
+                                        //image.save("webcam_capture.png")?;
                                     }
                                     Err(e) => {
                                         println!("Error capturing frame: {}", e);
