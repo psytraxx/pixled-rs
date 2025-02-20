@@ -1,0 +1,10 @@
+[package]
+name = "pixled-rs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crossterm = "0.28.1"
+ddp-rs = "1.0.0"
+image = { version = "0.25.5", features = ["color_quant"] }
+nokhwa = { version = "0.10.7", features = ["input-native", "output-wgpu"] }
