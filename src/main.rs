@@ -82,7 +82,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                                         let image = unsharpen(&image, 0.5, 5);
 
                                         let pixel_values: Vec<u8> = image
-                                            .into_vec()
+                                            .into_raw()
                                             .into_iter()
                                             .map(|v| gamma_lut[v as usize])
                                             .collect();
