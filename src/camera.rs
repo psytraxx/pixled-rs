@@ -1,16 +1,16 @@
+use anyhow::{anyhow, Context, Result};
 use nokhwa::{
     pixel_format::RgbFormat,
     query,
     utils::{frame_formats, RequestedFormat, RequestedFormatType, Resolution},
     Camera,
 };
-use std::error::Error;
 
-pub fn open_first_camera() -> Result<Camera, Box<dyn Error>> {
-    let backend = nokhwa::native_api_backend().ok_or("No native camera backend available")?;
+pub fn open_first_camera() -> Result<Camera> {
+    let backend = nokhwa::native_api_backend().ok_or_else(|| anyhow!("No native camera backend available"))?;
     println!("Using native backend: {}", backend);
 
-    let devices = query(backend)?;
+    let devices = query(backend).context("Failed to query camera devices")?;
     for device in devices {
         println!("-------------> Device: {}", device.description());
         let index = device.index();
@@ -28,7 +28,7 @@ pub fn open_first_camera() -> Result<Camera, Box<dyn Error>> {
         }
     }
 
-    Err("No usable camera found".into())
+    Err(anyhow!("No usable camera found"))
 }
 
 pub fn print_compatible_formats(cam: &mut Camera) {
@@ -44,8 +44,8 @@ pub fn print_compatible_formats(cam: &mut Camera) {
     }
 }
 
-pub fn capture_rgb_frame(cam: &mut Camera) -> Result<Vec<u8>, Box<dyn Error>> {
-    let frame = cam.frame()?;
-    let image = frame.decode_image::<RgbFormat>()?;
+pub fn capture_rgb_frame(cam: &mut Camera) -> Result<Vec<u8>> {
+    let frame = cam.frame().context("Failed to capture frame")?;
+    let image = frame.decode_image::<RgbFormat>().context("Failed to decode frame")?;
     Ok(image.into_raw())
 }

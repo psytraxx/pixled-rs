@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow = "1.0.102"
 crossterm = "0.29.0"
 ddp-rs = "1.0.0"
 image = { version = "0.25.10", features = ["color_quant"] }

@@ -2,16 +2,18 @@ mod camera;
 mod image_processing;
 mod led;
 
+use anyhow::Result;
 use crossterm::event::{poll, read, Event};
-use std::{error::Error, time::Duration};
+use std::time::Duration;
 
-//const DDP_HOST: &str = "192.168.178.63:4048"; // matrix
-const DDP_HOST: &str = "192.168.178.69:4048";
+const DDP_HOST: &str = "192.168.178.63:4048"; // matrix
+
+//const DDP_HOST: &str = "192.168.178.69:4048";
 const OUTPUT_SIZE: u32 = 64;
 const GAMMA: f32 = 2.0;
 const FRAME_INTERVAL_MS: u64 = 10;
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<()> {
     let mut led = led::LedOutput::try_new(DDP_HOST)?;
     let gamma_lut = image_processing::build_gamma_lut(GAMMA);
 
@@ -33,16 +35,18 @@ fn main() -> Result<(), Box<dyn Error>> {
         let format = cam.camera_format();
         match camera::capture_rgb_frame(&mut cam) {
             Ok(raw) => {
-                let pixels = image_processing::process_frame(
+                match image_processing::process_frame(
                     raw,
                     format.width(),
                     format.height(),
                     OUTPUT_SIZE,
                     &gamma_lut,
-                );
-                led.send(&pixels)?;
+                ) {
+                    Ok(pixels) => led.send(&pixels)?,
+                    Err(e) => println!("Error processing frame: {e}"),
+                }
             }
-            Err(e) => println!("Error capturing frame: {}", e),
+            Err(e) => println!("Error capturing frame: {e}"),
         }
     }
 
