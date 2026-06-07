@@ -19,7 +19,9 @@ impl LedOutput {
     }
 
     pub fn send(&mut self, pixel_values: &[u8]) -> Result<()> {
-        self.conn.write(pixel_values).context("Failed to send DDP frame")?;
+        self.conn
+            .write(pixel_values)
+            .context("Failed to send DDP frame")?;
         Ok(())
     }
 }

@@ -7,7 +7,8 @@ use nokhwa::{
 };
 
 pub fn open_first_camera() -> Result<Camera> {
-    let backend = nokhwa::native_api_backend().ok_or_else(|| anyhow!("No native camera backend available"))?;
+    let backend = nokhwa::native_api_backend()
+        .ok_or_else(|| anyhow!("No native camera backend available"))?;
     println!("Using native backend: {}", backend);
 
     let devices = query(backend).context("Failed to query camera devices")?;
@@ -46,6 +47,8 @@ pub fn print_compatible_formats(cam: &mut Camera) {
 
 pub fn capture_rgb_frame(cam: &mut Camera) -> Result<Vec<u8>> {
     let frame = cam.frame().context("Failed to capture frame")?;
-    let image = frame.decode_image::<RgbFormat>().context("Failed to decode frame")?;
+    let image = frame
+        .decode_image::<RgbFormat>()
+        .context("Failed to decode frame")?;
     Ok(image.into_raw())
 }
