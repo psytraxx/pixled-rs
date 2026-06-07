@@ -100,7 +100,9 @@ fn main() -> Result<(), Box<dyn Error>> {
                                 std::thread::sleep(std::time::Duration::from_millis(10));
                             }
 
-                            camera.stop_stream().unwrap();
+                            if let Err(e) = camera.stop_stream() {
+                                println!("Error stopping stream: {e}");
+                            }
                             println!("Camera {} stream stopped", index);
                         }
                         Err(e) => {
@@ -120,11 +122,15 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn camera_print_controls(cam: &Camera) {
-    let ctrls = cam.camera_controls().unwrap();
     let index = cam.index();
-    println!("Controls for camera {index}");
-    for ctrl in ctrls {
-        println!("{ctrl}")
+    match cam.camera_controls() {
+        Ok(ctrls) => {
+            println!("Controls for camera {index}");
+            for ctrl in ctrls {
+                println!("{ctrl}")
+            }
+        }
+        Err(e) => println!("Could not get controls for camera {index}: {e}"),
     }
 }
 
@@ -136,7 +142,7 @@ fn camera_compatible_formats(cam: &mut Camera) {
             for (resolution, fps) in compatible {
                 formats.push((resolution, fps));
             }
-            formats.sort_by(|a, b| a.0.cmp(&b.0));
+            formats.sort_by_key(|a| a.0);
             for fmt in formats {
                 let (resolution, res) = fmt;
                 println!(" - {resolution}: {res:?}")
